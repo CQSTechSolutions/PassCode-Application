@@ -37,6 +37,8 @@ export default function PasswordForm({
       setUser(editingEntry.user);
       setPassword(editingEntry.password);
       setNotes(editingEntry.notes || '');
+    } else {
+      resetForm();
     }
   }, [editingEntry]);
 
@@ -57,9 +59,6 @@ export default function PasswordForm({
     setUser('');
     setPassword('');
     setNotes('');
-    if (editingEntry) {
-      onCancelEdit();
-    }
   };
 
   return (
@@ -68,11 +67,9 @@ export default function PasswordForm({
         <Text style={styles.formTitle}>
           {editingEntry ? 'Edit Password' : 'Add New Password'}
         </Text>
-        {editingEntry && (
-          <TouchableOpacity style={styles.cancelButton} onPress={onCancelEdit}>
-            <Ionicons name="close" size={22} color="#0078D7" />
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity style={styles.cancelButton} onPress={onCancelEdit}>
+          <Ionicons name="close-circle" size={24} color="#0078D7" />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.form}>
@@ -83,6 +80,7 @@ export default function PasswordForm({
             style={styles.input}
             value={destination}
             onChangeText={setDestination}
+            autoFocus
           />
         </View>
 
@@ -129,15 +127,27 @@ export default function PasswordForm({
           />
         </View>
 
-        <TouchableOpacity 
-          style={styles.saveButton} 
-          onPress={handleSubmit}
-          disabled={!destination || !user || !password}
-        >
-          <Text style={styles.saveButtonText}>
-            {editingEntry ? 'Update Password' : 'Save Password'}
-          </Text>
-        </TouchableOpacity>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity 
+            style={styles.cancelTextButton} 
+            onPress={onCancelEdit}
+          >
+            <Text style={styles.cancelButtonText}>Cancel</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[
+              styles.saveButton, 
+              (!destination || !user || !password) && styles.saveButtonDisabled
+            ]} 
+            onPress={handleSubmit}
+            disabled={!destination || !user || !password}
+          >
+            <Text style={styles.saveButtonText}>
+              {editingEntry ? 'Update' : 'Save'}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -145,21 +155,26 @@ export default function PasswordForm({
 
 const styles = StyleSheet.create({
   formContainer: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: 'white',
     borderRadius: 8,
-    padding: 16,
+    padding: 20,
     marginBottom: 20,
     borderWidth: 1,
     borderColor: '#e0e0e0',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   headerContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   formTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#0078D7',
   },
@@ -167,37 +182,57 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   form: {
-    gap: 12,
+    gap: 16,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 4,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#ddd',
   },
   inputIcon: {
-    marginLeft: 10,
-    marginRight: 5,
+    marginLeft: 12,
+    marginRight: 8,
   },
   input: {
-    padding: 12,
+    padding: 14,
     fontSize: 16,
     flex: 1,
   },
   visibilityIcon: {
     padding: 12,
   },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: 10,
+  },
   saveButton: {
     backgroundColor: '#0078D7',
-    borderRadius: 4,
-    padding: 12,
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
     alignItems: 'center',
-    marginTop: 8,
+  },
+  saveButtonDisabled: {
+    backgroundColor: '#cccccc',
   },
   saveButtonText: {
     color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  cancelTextButton: {
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  cancelButtonText: {
+    color: '#0078D7',
     fontWeight: 'bold',
     fontSize: 16,
   },

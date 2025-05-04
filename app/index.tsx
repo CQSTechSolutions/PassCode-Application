@@ -10,7 +10,9 @@ import {
   Platform,
   Animated,
   RefreshControl,
-  ScrollView
+  ScrollView,
+  Modal,
+  Alert
 } from 'react-native';
 import * as Updates from 'expo-updates';
 import { Ionicons } from '@expo/vector-icons';
@@ -39,6 +41,8 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [editingEntry, setEditingEntry] = useState<PasswordEntry | null>(null);
   const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
   
   const scrollY = useRef(new Animated.Value(0)).current;
   
@@ -94,6 +98,7 @@ export default function HomeScreen() {
 
   const handleSave = (destination: string, user: string, password: string, notes: string) => {
     addEntry(destination, user, password, notes, loadEntries);
+    setShowPasswordForm(false);
   };
 
   const handleUpdate = (id: number, destination: string, user: string, password: string, notes: string) => {
@@ -107,10 +112,12 @@ export default function HomeScreen() {
 
   const handleEdit = (entry: PasswordEntry) => {
     setEditingEntry(entry);
+    setShowPasswordForm(true);
   };
   
   const handleCancelEdit = () => {
     setEditingEntry(null);
+    setShowPasswordForm(false);
   };
 
   const handleRefresh = () => {
@@ -120,23 +127,56 @@ export default function HomeScreen() {
   // Check for over-the-air updates
   const checkForUpdates = async () => {
     try {
+      setIsCheckingUpdate(true);
       const update = await Updates.checkForUpdateAsync();
       
       if (update.isAvailable) {
         setUpdateAvailable(true);
+        Alert.alert(
+          "Update Available",
+          "A new version of the app is available. Would you like to update now?",
+          [
+            {
+              text: "Later",
+              style: "cancel"
+            },
+            {
+              text: "Update Now",
+              onPress: applyUpdate
+            }
+          ]
+        );
+      } else {
+        // Alert.alert("No Updates", "Your app is up to date.");
       }
     } catch (error) {
       console.error("Error checking for updates:", error);
+      Alert.alert("Update Error", "Unable to check for updates. Please try again later.");
+    } finally {
+      setIsCheckingUpdate(false);
     }
   };
   
   // Apply available updates
   const applyUpdate = async () => {
     try {
+      Alert.alert("Updating", "Downloading update...");
       await Updates.fetchUpdateAsync();
-      await Updates.reloadAsync(); 
+      Alert.alert(
+        "Update Downloaded",
+        "The update has been downloaded and will be applied now. The app will restart.",
+        [
+          {
+            text: "OK",
+            onPress: async () => {
+              await Updates.reloadAsync();
+            }
+          }
+        ]
+      );
     } catch (error) {
       console.error("Error applying update:", error);
+      Alert.alert("Update Failed", "Unable to apply the update. Please try again later.");
     }
   };
 
@@ -146,30 +186,54 @@ export default function HomeScreen() {
       
       {/* Animated Header */}
       <Animated.View style={[styles.header, { height: headerHeight }]}>
-        <View style={[styles.headerContent]}>
+        <View style={[styles.headerTopRow]}>
           <Animated.Text style={[styles.headerTitle, { opacity: headerTitleOpacity }]}>
             PassCode
           </Animated.Text>
-          <Animated.View style={[styles.headerDetails, { opacity: headerDetailOpacity }]}>
-            <Text style={styles.appTitle}>PassCode</Text>
-            <Text style={styles.appSubtitle}>Secure Password Storage</Text>
-          </Animated.View>
+          <TouchableOpacity 
+            style={styles.updateCheckButton} 
+            onPress={checkForUpdates}
+            disabled={isCheckingUpdate}
+          >
+            <Ionicons 
+              name="refresh-circle" 
+              size={24} 
+              color="white" 
+            />
+          </TouchableOpacity>
         </View>
+
+        <Animated.View style={[styles.headerDetails, { opacity: headerDetailOpacity }]}>
+          <Text style={styles.appTitle}>PassCode</Text>
+          <Text style={styles.appSubtitle}>Secure Password Storage</Text>
+        </Animated.View>
         
-        {/* Search Bar */}
-        <View style={styles.searchContainer}>
-          <Ionicons name="search" size={20} color="#666" style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search passwords..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-          {searchQuery ? (
-            <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <Ionicons name="close" size={20} color="#666" />
-            </TouchableOpacity>
-          ) : null}
+        {/* Search Bar and Add Button */}
+        <View style={styles.searchRow}>
+          <View style={styles.searchContainer}>
+            <Ionicons name="search" size={20} color="#666" style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search passwords..."
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+            {searchQuery ? (
+              <TouchableOpacity onPress={() => setSearchQuery('')}>
+                <Ionicons name="close" size={20} color="#666" />
+              </TouchableOpacity>
+            ) : null}
+          </View>
+          
+          <TouchableOpacity 
+            style={styles.addButton}
+            onPress={() => {
+              setEditingEntry(null);
+              setShowPasswordForm(true);
+            }}
+          >
+            <Ionicons name="add" size={24} color="white" />
+          </TouchableOpacity>
         </View>
       </Animated.View>
       
@@ -192,19 +256,31 @@ export default function HomeScreen() {
         )}
         scrollEventThrottle={16}
       >
-        <PasswordForm 
-          onSave={handleSave} 
-          onUpdate={handleUpdate}
-          editingEntry={editingEntry}
-          onCancelEdit={handleCancelEdit}
-        />
-        
         <PasswordList 
           entries={filteredEntries} 
           onDelete={handleDelete}
           onEdit={handleEdit}
         />
       </ScrollView>
+      
+      {/* Password Form Modal */}
+      <Modal
+        visible={showPasswordForm}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={handleCancelEdit}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <PasswordForm 
+              onSave={handleSave} 
+              onUpdate={handleUpdate}
+              editingEntry={editingEntry}
+              onCancelEdit={handleCancelEdit}
+            />
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -222,21 +298,31 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     zIndex: 10,
   },
+  headerTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+  },
   headerContent: {
     height: 90,
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 10,
-  },  
+  },
+  updateCheckButton: {
+    padding: 5,
+  },
   headerTitle: {
     color: 'white',
     fontSize: 20,
     fontWeight: 'bold',
   },
   headerDetails: {
-    flex: 1,
     alignItems: 'center',
+    marginTop: 5,
+    marginBottom: 5,
   },
   appTitle: {
     fontSize: 22,
@@ -248,13 +334,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'rgba(255, 255, 255, 0.8)',
   },
+  searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 12,
+  },
   searchContainer: {
     backgroundColor: 'white',
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 8,
-    marginTop: 12,
     paddingHorizontal: 12,
+    flex: 1,
+    marginRight: 10,
   },
   searchIcon: {
     marginRight: 8,
@@ -263,6 +355,17 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
     fontSize: 16,
+  },
+  addButton: {
+    backgroundColor: '#0078D7',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 3,
+    borderWidth: 2,
+    borderColor: 'white',
   },
   updateBanner: {
     backgroundColor: '#4CAF50',
@@ -279,5 +382,16 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 16,
     paddingTop: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  modalContent: {
+    width: '100%',
+    maxWidth: 500,
   },
 });

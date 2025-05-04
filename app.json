@@ -35,18 +35,20 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-sqlite"
+      "expo-sqlite",
+      "expo-updates"
     ],
     "experiments": {
       "typedRoutes": true
     },
     "updates": {
       "enabled": true,
+      "checkAutomatically": "ON_LOAD",
       "fallbackToCacheTimeout": 0,
       "url": "https://u.expo.dev/ad0e6623-c1f8-49c1-8967-2ae207489f2e"
     },
     "runtimeVersion": {
-      "policy": "appVersion"
+      "policy": "sdkVersion"
     },
     "extra": {
       "router": {},
