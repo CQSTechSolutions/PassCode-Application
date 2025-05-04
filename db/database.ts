@@ -31,6 +31,29 @@ export async function addEntry(destination: string, user: string, password: stri
   }
 }
 
+export async function updateEntry(id: number, destination: string, user: string, password: string, notes: string, callback: () => void) {
+  const database = await db;
+  try {
+    await database.runAsync(
+      'UPDATE passwords SET destination = ?, user = ?, password = ?, notes = ? WHERE id = ?;',
+      [destination, user, password, notes, id]
+    );
+    callback();
+  } catch (error) {
+    console.error("Update error:", error);
+  }
+}
+
+export async function deleteEntry(id: number, callback: () => void) {
+  const database = await db;
+  try {
+    await database.runAsync('DELETE FROM passwords WHERE id = ?;', [id]);
+    callback();
+  } catch (error) {
+    console.error("Delete error:", error);
+  }
+}
+
 export async function fetchEntries(callback: (entries: any[]) => void) {
   const database = await db;
   try {
