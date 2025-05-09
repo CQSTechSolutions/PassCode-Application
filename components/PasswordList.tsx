@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -17,11 +17,15 @@ interface PasswordListProps {
 }
 
 export default function PasswordList({ entries, onDelete, onEdit }: PasswordListProps) {
-  // Sort entries by destination, with newest at the top
-  const sortedEntries = [...entries].sort((a, b) => {
-    // If IDs are available, sort by descending ID (assuming higher ID = newer)
-    return b.id - a.id;
-  });
+  const [visiblePasswords, setVisiblePasswords] = useState<number[]>([]);
+
+  const togglePasswordVisibility = (id: number) => {
+    setVisiblePasswords((prev) =>
+      prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id]
+    );
+  };
+
+  const sortedEntries = [...entries].sort((a, b) => b.id - a.id);
 
   const handleDelete = (id: number) => {
     Alert.alert(
@@ -40,50 +44,57 @@ export default function PasswordList({ entries, onDelete, onEdit }: PasswordList
 
   return (
     <View style={styles.container}>
-      {sortedEntries.map((entry) => (
-        <View key={entry.id} style={styles.card}>
-          <View style={styles.cardHeader}>
-            <Text style={styles.destination}>{entry.destination}</Text>
-            <View style={styles.actions}>
-              <TouchableOpacity 
-                style={styles.actionButton} 
-                onPress={() => handleEdit(entry)}
-              >
-                <Ionicons name="pencil" size={20} color="#0078D7" />
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.actionButton} 
-                onPress={() => handleDelete(entry.id)}
-              >
-                <Ionicons name="trash" size={20} color="#E81123" />
-              </TouchableOpacity>
-            </View>
-          </View>
-          
-          <View style={styles.cardBody}>
-            <View style={styles.cardRow}>
-              <Ionicons name="person" size={18} color="#666" style={styles.icon} />
-              <Text style={styles.label}>Username:</Text>
-              <Text style={styles.value}>{entry.user}</Text>
-            </View>
-            
-            <View style={styles.cardRow}>
-              <Ionicons name="key" size={18} color="#666" style={styles.icon} />
-              <Text style={styles.label}>Password:</Text>
-              <Text style={styles.value}>{entry.password}</Text>
-            </View>
-            
-            {entry.notes ? (
-              <View style={styles.cardRow}>
-                <Ionicons name="document-text" size={18} color="#666" style={styles.icon} />
-                <Text style={styles.label}>Notes:</Text>
-                <Text style={styles.value}>{entry.notes}</Text>
+      {sortedEntries.map((entry) => {
+        const isVisible = visiblePasswords.includes(entry.id);
+        return (
+          <View key={entry.id} style={styles.card}>
+            <View style={styles.cardHeader}>
+              <Text style={styles.destination}>{entry.destination}</Text>
+              <View style={styles.actions}>
+                <TouchableOpacity style={styles.actionButton} onPress={() => handleEdit(entry)}>
+                  <Ionicons name="pencil" size={20} color="#0078D7" />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.actionButton} onPress={() => handleDelete(entry.id)}>
+                  <Ionicons name="trash" size={20} color="#E81123" />
+                </TouchableOpacity>
               </View>
-            ) : null}
+            </View>
+
+            <View style={styles.cardBody}>
+              <View style={styles.cardRow}>
+                <Ionicons name="person" size={18} color="#666" style={styles.icon} />
+                <Text style={styles.label}>Username:</Text>
+                <Text style={styles.value}>{entry.user}</Text>
+              </View>
+
+              <View style={styles.cardRow}>
+                <Ionicons name="key" size={18} color="#666" style={styles.icon} />
+                <Text style={styles.label}>Password:</Text>
+                <Text style={styles.value}>
+                  {isVisible ? entry.password : '•'.repeat(entry.password.length)}
+                </Text>
+                <TouchableOpacity onPress={() => togglePasswordVisibility(entry.id)}>
+                  <Ionicons
+                    name={isVisible ? "eye-off" : "eye"}
+                    size={18}
+                    color="#666"
+                    style={{ marginLeft: 6 }}
+                  />
+                </TouchableOpacity>
+              </View>
+
+              {entry.notes ? (
+                <View style={styles.cardRow}>
+                  <Ionicons name="document-text" size={18} color="#666" style={styles.icon} />
+                  <Text style={styles.label}>Notes:</Text>
+                  <Text style={styles.value}>{entry.notes}</Text>
+                </View>
+              ) : null}
+            </View>
           </View>
-        </View>
-      ))}
-      
+        );
+      })}
+
       {entries.length === 0 && (
         <View style={styles.emptyState}>
           <Ionicons name="lock-closed" size={48} color="#ccc" />
@@ -93,6 +104,7 @@ export default function PasswordList({ entries, onDelete, onEdit }: PasswordList
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {

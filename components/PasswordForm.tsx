@@ -77,6 +77,7 @@ export default function PasswordForm({
           <Ionicons name="globe" size={20} color="#666" style={styles.inputIcon} />
           <TextInput
             placeholder="Website or App"
+            placeholderTextColor="#888"
             style={styles.input}
             value={destination}
             onChangeText={setDestination}
@@ -88,6 +89,7 @@ export default function PasswordForm({
           <Ionicons name="person" size={20} color="#666" style={styles.inputIcon} />
           <TextInput
             placeholder="Username or Email"
+            placeholderTextColor="#888"
             style={styles.input}
             value={user}
             onChangeText={setUser}
@@ -99,6 +101,7 @@ export default function PasswordForm({
           <Ionicons name="key" size={20} color="#666" style={styles.inputIcon} />
           <TextInput
             placeholder="Password"
+            placeholderTextColor="#888"
             style={[styles.input, { flex: 1 }]}
             secureTextEntry={!showPassword}
             value={password}
@@ -120,6 +123,7 @@ export default function PasswordForm({
           <Ionicons name="document-text" size={20} color="#666" style={styles.inputIcon} />
           <TextInput
             placeholder="Notes (optional)"
+            placeholderTextColor="#888"
             style={styles.input}
             value={notes}
             onChangeText={setNotes}

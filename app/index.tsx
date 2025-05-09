@@ -215,6 +215,7 @@ export default function HomeScreen() {
             <TextInput
               style={styles.searchInput}
               placeholder="Search passwords..."
+              placeholderTextColor="#888"
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
