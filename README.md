@@ -4,12 +4,15 @@ A secure password manager that stores your credentials locally on your device. T
 
 ## Features
 
-- Local password storage for enhanced security
-- Edge browser-like modern UI
-- Search functionality
-- Complete CRUD operations (Create, Read, Update, Delete)
-- Sorting by destination
-- OTA (Over-The-Air) updates
+- **🔐 Biometric Authentication**: Secure access using fingerprint, Face ID, or device PIN/password
+- **🔒 Auto-lock**: App automatically locks when going to background
+- **⚙️ Security Settings**: Toggle authentication and manually lock the app
+- **📱 Local password storage** for enhanced security
+- **🎨 Edge browser-like modern UI**
+- **🔍 Search functionality**
+- **📝 Complete CRUD operations** (Create, Read, Update, Delete)
+- **📊 Sorting by destination**
+- **🔄 OTA (Over-The-Air) updates**
 
 ## Setup
 
@@ -17,6 +20,10 @@ A secure password manager that stores your credentials locally on your device. T
 2. Install dependencies:
    ```bash
    npm install
+   ```
+3. Install security dependencies:
+   ```bash
+   npx expo install expo-local-authentication
    ```
 
 ## Development
@@ -95,6 +102,25 @@ After making changes to your application, push an OTA update:
    ```bash
    eas update --branch production --message "Update message"
    ```
+
+## Security Features
+
+### Biometric Authentication
+The app uses `expo-local-authentication` to provide secure access through:
+- **Fingerprint recognition** (Touch ID)
+- **Face recognition** (Face ID)
+- **Device PIN/password** (fallback option)
+
+### Auto-lock Functionality
+- App automatically locks when going to background
+- Requires re-authentication when returning to the app
+- Can be manually locked from settings
+
+### Security Settings
+Access security settings by tapping the settings icon in the header:
+- Toggle biometric authentication on/off
+- Manually lock the app
+- View security information
 
 ## Using OTA Updates in the App
 
