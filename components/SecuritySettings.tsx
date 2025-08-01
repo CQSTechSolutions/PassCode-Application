@@ -18,6 +18,7 @@ const SecuritySettings: React.FC = () => {
     enableSecurity,
     disableSecurity,
     lockApp,
+    retrySecurityCheck,
   } = useSecurity();
 
   const handleToggleSecurity = (value: boolean) => {
@@ -82,32 +83,46 @@ const SecuritySettings: React.FC = () => {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Authentication</Text>
-          
+
           <View style={styles.settingItem}>
             <View style={styles.settingInfo}>
               <Ionicons name="finger-print" size={24} color="#0078D7" />
               <View style={styles.settingText}>
-                <Text style={styles.settingTitle}>Biometric Authentication</Text>
+                <Text style={styles.settingTitle}>
+                  Biometric Authentication
+                </Text>
                 <Text style={styles.settingDescription}>
-                  Require fingerprint, Face ID, or device PIN/password to access the app
+                  Require fingerprint, Face ID, or device PIN/password to access
+                  the app
                 </Text>
               </View>
             </View>
             <Switch
               value={isSecurityEnabled}
               onValueChange={handleToggleSecurity}
-              trackColor={{ false: '#e0e0e0', true: '#0078D7' }}
-              thumbColor={isSecurityEnabled ? '#ffffff' : '#f4f3f4'}
+              trackColor={{ false: "#e0e0e0", true: "#0078D7" }}
+              thumbColor={isSecurityEnabled ? "#ffffff" : "#f4f3f4"}
             />
           </View>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Actions</Text>
-          
+
           <TouchableOpacity style={styles.actionButton} onPress={handleLockApp}>
             <Ionicons name="lock-closed" size={24} color="#FF6B6B" />
             <Text style={styles.actionButtonText}>Lock App Now</Text>
+            <Ionicons name="chevron-forward" size={20} color="#666" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={retrySecurityCheck}
+          >
+            <Ionicons name="refresh" size={24} color="#0078D7" />
+            <Text style={styles.actionButtonTextBlue}>
+              Re-check Biometric Setup
+            </Text>
             <Ionicons name="chevron-forward" size={20} color="#666" />
           </TouchableOpacity>
         </View>
@@ -117,10 +132,11 @@ const SecuritySettings: React.FC = () => {
             <Ionicons name="information-circle" size={24} color="#0078D7" />
             <Text style={styles.infoTitle}>Security Information</Text>
             <Text style={styles.infoText}>
-              • Biometric authentication uses your device's built-in security features{'\n'}
-              • If biometrics are not available, you can use your device PIN or password{'\n'}
-              • The app will automatically lock when you close it{'\n'}
-              • You can manually lock the app at any time using the "Lock App Now" button
+              • Biometric authentication uses your device's built-in security
+              features{"\n"}• If biometrics are not available, you can use your
+              device PIN or password{"\n"}• The app will automatically lock when
+              you close it{"\n"}• You can manually lock the app at any time
+              using the "Lock App Now" button
             </Text>
           </View>
         </View>
@@ -132,46 +148,46 @@ const SecuritySettings: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: "#f8f9fa",
   },
   scrollView: {
     flex: 1,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 20,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: "#e0e0e0",
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
+    fontWeight: "bold",
+    color: "#1a1a1a",
     marginLeft: 12,
   },
   section: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     marginTop: 16,
     paddingHorizontal: 20,
     paddingVertical: 16,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#1a1a1a',
+    fontWeight: "600",
+    color: "#1a1a1a",
     marginBottom: 16,
   },
   settingItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingVertical: 8,
   },
   settingInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     flex: 1,
   },
   settingText: {
@@ -180,27 +196,34 @@ const styles = StyleSheet.create({
   },
   settingTitle: {
     fontSize: 16,
-    fontWeight: '500',
-    color: '#1a1a1a',
+    fontWeight: "500",
+    color: "#1a1a1a",
     marginBottom: 4,
   },
   settingDescription: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     lineHeight: 20,
   },
   actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 16,
     paddingHorizontal: 4,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: "#f0f0f0",
   },
   actionButtonText: {
     fontSize: 16,
-    fontWeight: '500',
-    color: '#FF6B6B',
+    fontWeight: "500",
+    color: "#FF6B6B",
+    marginLeft: 12,
+    flex: 1,
+  },
+  actionButtonTextBlue: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#0078D7",
     marginLeft: 12,
     flex: 1,
   },
@@ -208,22 +231,22 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   infoCard: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     padding: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(0, 120, 215, 0.2)',
+    borderColor: "rgba(0, 120, 215, 0.2)",
   },
   infoTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#1a1a1a',
+    fontWeight: "600",
+    color: "#1a1a1a",
     marginTop: 8,
     marginBottom: 12,
   },
   infoText: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     lineHeight: 20,
   },
 });

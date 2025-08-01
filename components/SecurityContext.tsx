@@ -6,12 +6,15 @@ interface SecurityContextType {
   isAuthenticated: boolean;
   isSecurityEnabled: boolean;
   showSecurityCheck: boolean;
+  showSecurityRecommendation: boolean;
   isInitializing: boolean;
   authenticate: () => Promise<boolean>;
   enableSecurity: () => void;
   disableSecurity: () => void;
   lockApp: () => void;
   unlockApp: () => void;
+  continueWithoutSecurity: () => void;
+  retrySecurityCheck: () => void;
 }
 
 const SecurityContext = createContext<SecurityContextType | undefined>(
@@ -28,6 +31,8 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isSecurityEnabled, setIsSecurityEnabled] = useState(true); // Default to enabled
   const [showSecurityCheck, setShowSecurityCheck] = useState(true);
+  const [showSecurityRecommendation, setShowSecurityRecommendation] =
+    useState(false);
   const [isInitializing, setIsInitializing] = useState(true); // Track initialization state
 
   // Check if device supports biometric authentication
@@ -53,10 +58,10 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({
       const isSupported = await checkBiometricSupport();
 
       if (!isSupported) {
-        // If biometric is not supported, allow access but show a message
-        console.log("Biometric authentication not available, allowing access");
-        setIsAuthenticated(true);
-        return true;
+        // Show security recommendation instead of allowing access immediately
+        setShowSecurityCheck(false);
+        setShowSecurityRecommendation(true);
+        return false;
       }
 
       const result = await LocalAuthentication.authenticateAsync({
@@ -64,12 +69,12 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({
         fallbackLabel: "Use device PIN/password",
         cancelLabel: "Cancel",
         disableDeviceFallback: false,
-        requireAuthentication: true,
       });
 
       if (result.success) {
         setIsAuthenticated(true);
         setShowSecurityCheck(false);
+        setShowSecurityRecommendation(false);
         return true;
       } else {
         setIsAuthenticated(false);
@@ -105,6 +110,21 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({
   const unlockApp = () => {
     setIsAuthenticated(true);
     setShowSecurityCheck(false);
+    setShowSecurityRecommendation(false);
+  };
+
+  // Continue without security
+  const continueWithoutSecurity = () => {
+    setIsAuthenticated(true);
+    setShowSecurityCheck(false);
+    setShowSecurityRecommendation(false);
+  };
+
+  // Retry security check (after user sets up biometrics)
+  const retrySecurityCheck = async () => {
+    setShowSecurityRecommendation(false);
+    setShowSecurityCheck(true);
+    await authenticate();
   };
 
   // Check authentication on app start
@@ -144,12 +164,15 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({
     isAuthenticated,
     isSecurityEnabled,
     showSecurityCheck,
+    showSecurityRecommendation,
     isInitializing,
     authenticate,
     enableSecurity,
     disableSecurity,
     lockApp,
     unlockApp,
+    continueWithoutSecurity,
+    retrySecurityCheck,
   };
 
   return (

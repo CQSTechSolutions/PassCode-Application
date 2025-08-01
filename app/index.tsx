@@ -22,6 +22,7 @@ import PasswordForm from "../components/PasswordForm";
 import PasswordList from "../components/PasswordList";
 import SecurityCheck from "../components/SecurityCheck";
 import { useSecurity } from "../components/SecurityContext";
+import SecurityRecommendation from "../components/SecurityRecommendation";
 import {
   addEntry,
   deleteEntry,
@@ -40,8 +41,15 @@ type PasswordEntry = {
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { isAuthenticated, showSecurityCheck, unlockApp, isInitializing } =
-    useSecurity();
+  const {
+    isAuthenticated,
+    showSecurityCheck,
+    showSecurityRecommendation,
+    unlockApp,
+    continueWithoutSecurity,
+    retrySecurityCheck,
+    isInitializing,
+  } = useSecurity();
   const [entries, setEntries] = useState<PasswordEntry[]>([]);
   const [filteredEntries, setFilteredEntries] = useState<PasswordEntry[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -219,6 +227,16 @@ export default function HomeScreen() {
           <Text style={styles.loadingText}>Initializing PassCode...</Text>
         </View>
       </SafeAreaView>
+    );
+  }
+
+  // Show security recommendation if device is not secured
+  if (showSecurityRecommendation) {
+    return (
+      <SecurityRecommendation
+        onContinue={continueWithoutSecurity}
+        onSetupSecurity={retrySecurityCheck}
+      />
     );
   }
 
